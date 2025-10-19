@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gửi Lời Yêu Thương 💌</title>
+<style>
+/* ====== CÀI ĐẶT CƠ BẢN ====== */
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+  color: white;
+}
+
+/* ====== CANVAS NỀN GALAXY ====== */
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/* ====== Ô MẬT KHẨU ====== */
+#passwordScreen {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #ff9ad6;
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+#passwordInput {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  width: 180px;
+  text-align: center;
+  margin-top: 10px;
+}
+#checkPassword {
+  margin-top: 15px;
+  background-color: #ff5f91;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 25px;
+  color: white;
+  cursor: pointer;
+}
+
+/* ====== HỘP LÁ THƯ ====== */
+#letter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid #ffb6c1;
+  border-radius: 20px;
+  padding: 30px;
+  width: 320px;
+  text-align: center;
+  color: white;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+.hidden { display: none; }
+
+/* ====== NÚT ĐỌC XONG ====== */
+button {
+  margin-top: 15px;
+  background-color: #ff5f91;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 30px;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover { background-color: #ff80b0; }
+
+/* ====== TRÁI TIM ====== */
+#heartContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+#heart {
+  font-size: 90px;
+  cursor: pointer;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* ====== ẢNH RƠI ====== */
+.falling-img {
+  position: fixed;
+  top: -10%;
+  animation-name: fall;
+  animation-timing-function: linear;
+  opacity: 0.9;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(360deg); opacity: 0.7; }
+}
+
+/* ====== HIỆU ỨNG FADE ====== */
+.fade-in { animation: fadeIn 1s forwards; }
+.fade-out { animation: fadeOut 1s forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+</style>
+</head>
+
+<body>
+<canvas id="galaxy"></canvas>
+
+<!-- ====== PHẦN MẬT KHẨU ====== -->
+<div id="passwordScreen" class="fade-in">
+  <h2>🔒 Nhập mật khẩu để mở thư</h2>
+  <input type="password" id="passwordInput" placeholder="Nhập mật khẩu..."><br>
+  <button id="checkPassword">Mở thư 💌</button>
+  <p id="wrong" style="color:pink; display:none;">Sai mật khẩu rồi 😢</p>
+</div>
+
+<!-- ====== PHẦN LÁ THƯ ====== -->
+<div id="letter" class="hidden fade-in">
+  <h2>💌 Gửi đến người đặc biệt 💌</h2>
+  <p>
+    Anh muốn nói rằng, mỗi khoảnh khắc bên em đều là điều tuyệt vời nhất.  
+    Cảm ơn em vì đã đến và khiến thế giới của anh trở nên lung linh hơn 💖  
+    Dù thời gian có trôi, tình cảm này vẫn sẽ mãi như bầu trời đầy sao kia ✨
+  </p>
+  <button id="closeLetter">Đọc xong thư 💕</button>
+</div>
+
+<!-- ====== PHẦN TRÁI TIM ====== -->
+<div id="heartContainer" class="hidden fade-in">
+  <div id="heart">❤️</div>
+</div>
+
+<!-- ====== NHẠC ====== -->
+<audio id="music1" src="My only one (lyrics) - Sebastian Yatra ft. Isabela Moner - Finite Music (youtube).mp3"></audio>
+<audio id="music2" src="[THAISUB] Give Me Your Forever - Zack Tabudlo - MOODLY (youtube).mp3"></audio>
+
+<script>
+// ==================== HIỆU ỨNG GALAXY + SAO LẤP LÁNH ====================
+const canvas = document.getElementById("galaxy");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let stars = [];
+for (let i = 0; i < 200; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: Math.random() * 1.5,
+    speed: Math.random() * 0.3,
+    alpha: Math.random()
+  });
+  if (stars[i]) stars[i].alpha = 0.3 + Math.random() * 0.5; // sao nhẹ, bớt chói
+}
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, "#020010");  // Xanh đen gần như đêm
+  gradient.addColorStop(0.5, "#12033b"); // Tím than dịu
+  gradient.addColorStop(1, "#000010");  // Đen pha tím nhẹ
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for (let star of stars) {
+    ctx.globalAlpha = star.alpha;
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+    ctx.fill();
+    star.y += star.speed;
+    if (star.y > canvas.height) star.y = 0;
+    star.alpha += (Math.random() - 0.5) * 0.05;
+    if (star.alpha < 0.2) star.alpha = 0.2;
+    if (star.alpha > 1) star.alpha = 1;
+  }
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// ==================== MẬT KHẨU + NHẠC 1 ====================
+const passwordScreen = document.getElementById("passwordScreen");
+const passwordInput = document.getElementById("passwordInput");
+const checkPassword = document.getElementById("checkPassword");
+const wrong = document.getElementById("wrong");
+const letter = document.getElementById("letter");
+const closeLetter = document.getElementById("closeLetter");
+const heartContainer = document.getElementById("heartContainer");
+const music1 = document.getElementById("music1");
+const music2 = document.getElementById("music2");
+
+const correctPassword = "12"; // 🔑 ← đổi mật khẩu ở đây
+
+checkPassword.addEventListener("click", () => {
+  if (passwordInput.value === correctPassword) {
+    passwordScreen.classList.add("fade-out");
+    setTimeout(() => {
+      passwordScreen.style.display = "none";
+      letter.classList.remove("hidden");
+      music1.play();
+    }, 1000);
+  } else {
+    wrong.style.display = "block";
+  }
+});
+
+// ==================== KHI ĐỌC XONG THƯ ====================
+closeLetter.addEventListener("click", () => {
+  letter.classList.add("fade-out");
+  setTimeout(() => {
+    letter.style.display = "none";
+    heartContainer.classList.remove("hidden");
+  }, 1000);
+});
+
+// ==================== KHI ẤN TRÁI TIM ====================
+const heart = document.getElementById("heart");
+heart.addEventListener("click", () => {
+  heartContainer.classList.add("fade-out"); // Hiệu ứng biến mất
+  setTimeout(() => {
+    heartContainer.style.display = "none"; // Ẩn hẳn trái tim
+    music1.pause();
+    music2.play();
+    startFloatingImages();
+  }, 800);
+});
+
+// ==================== ẢNH RƠI NGẪU NHIÊN ====================
+const images = [
+  "1.jfif","2.jfif","3.jfif","4.jfif","5.jfif","6.jfif",
+  "7.jfif","8.jfif","9.jfif","10.jfif","11.jfif","12.jfif",
+  "13.jfif","14.jfif","15.jfif","16.jfif","17.jfif","18.jfif",
+  "19.jfif","20.jfif","21.jfif","22.jfif","23.jfif","24.jfif",
+  "25.jfif","26.jfif","27.jfif","28.jfif","29.jfif","30.jfif",
+  "31.jfif","32.jfif","33.jfif","34.jfif"
+];
+
+function startFloatingImages() {
+  setInterval(() => {
+    const img = document.createElement("img");
+    img.src = images[Math.floor(Math.random() * images.length)];
+    img.style.position = "fixed";
+    img.style.left = Math.random() * 100 + "vw";
+    img.style.top = Math.random() * 100 + "vh";
+    img.style.width = (50 + Math.random() * 50) + "px";
+    img.style.opacity = 0;
+    img.style.transition = "all 12s ease-in-out";
+    img.style.zIndex = 5;
+    document.body.appendChild(img);
+
+    // Sau khi thêm: hiện ảnh mờ dần và trôi ngẫu nhiên
+    setTimeout(() => {
+      img.style.opacity = 1;
+      img.style.transform = `
+        translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px)
+        scale(${0.8 + Math.random() * 0.4})
+        rotate(${(Math.random() - 0.5) * 40}deg)
+      `;
+    }, 100);
+
+    // 8s sau: ảnh mờ dần và biến mất
+    setTimeout(() => {
+      img.style.opacity = 0;
+      setTimeout(() => img.remove(), 4000);
+    }, 8000);
+  }, 1000);
+}
+</script>
+</body>
+</html>
